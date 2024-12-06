@@ -37,16 +37,21 @@ export default function Home() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
     });
-
+  
     if (res.ok) {
       const updatedTask = await res.json();
+  
+      // Update state tasks
       setTasks(
         tasks.map((task) =>
           task.id === updatedTask.id ? updatedTask : task
         )
       );
+    } else {
+      console.error('Failed to mark task as completed');
     }
   };
+  
 
   // Handle deleting a task
   const handleDeleteTask = async (id) => {
