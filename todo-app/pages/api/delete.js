@@ -1,13 +1,12 @@
+let tasks = [];
+
 export default function handler(req, res) {
-    if (req.method === 'POST') {
-      // Import tasks array from tasks.js
-      const tasksModule = require('./tasks');
-      
-      // Clear all tasks
-      tasksModule.tasks = [];
-      
-      res.status(200).json({ message: 'All tasks deleted successfully' });
-    } else {
-      res.status(405).json({ message: 'Method not allowed' });
-    }
+  if (req.method === 'DELETE') {
+    const { id } = req.body;
+    tasks = tasks.filter((task) => task.id !== id);
+    res.status(200).json({ message: 'Task deleted successfully' });
+  } else {
+    res.setHeader('Allow', ['DELETE']);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
   }
+}

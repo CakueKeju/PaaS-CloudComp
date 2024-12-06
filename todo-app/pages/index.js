@@ -1,3 +1,4 @@
+// pages/index.js
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 
@@ -5,54 +6,41 @@ export default function Home() {
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState('');
 
+  // Fetch tasks on component mount
   useEffect(() => {
-    fetchTasks();
+    fetch('/api/tasks')
+      .then((res) => res.json())
+      .then((data) => setTasks(data));
   }, []);
 
-  const fetchTasks = async () => {
-    try {
-      const response = await fetch('/api/tasks');
-      const data = await response.json();
-      setTasks(data);
-    } catch (error) {
-      console.error('Error fetching tasks:', error);
-    }
-  };
-
+  // Handle adding a new task
   const handleAddTask = async (e) => {
     e.preventDefault();
     if (!newTask.trim()) return;
 
-    try {
-      const response = await fetch('/api/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ task: newTask }),
-      });
+    const res = await fetch('/api/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ task: newTask }),
+    });
 
-      if (response.ok) {
-        fetchTasks();
-        setNewTask('');
-      }
-    } catch (error) {
-      console.error('Error adding task:', error);
+    if (res.ok) {
+      const task = await res.json();
+      setTasks([...tasks, task]);
+      setNewTask('');
     }
   };
 
+  // Handle clearing all tasks
   const handleDeleteAll = async () => {
-    try {
-      const response = await fetch('/api/delete', {
-        method: 'POST',
+    for (const task of tasks) {
+      await fetch('/api/delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: task.id }),
       });
-
-      if (response.ok) {
-        fetchTasks();
-      }
-    } catch (error) {
-      console.error('Error deleting tasks:', error);
     }
+    setTasks([]);
   };
 
   return (
@@ -89,9 +77,22 @@ export default function Home() {
                   </div>
                 </form>
                 <ul id="tasks" className="list-group mb-3">
-                  {tasks.map((task, index) => (
-                    <li key={index} className="list-group-item">
-                      {task}
+                  {tasks.map((task) => (
+                    <li key={task.id} className="list-group-item d-flex justify-content-between align-items-center">
+                      {task.task}
+                      <button
+                        className="btn btn-sm btn-danger"
+                        onClick={async () => {
+                          await fetch('/api/delete', {
+                            method: 'DELETE',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: task.id }),
+                          });
+                          setTasks(tasks.filter((t) => t.id !== task.id));
+                        }}
+                      >
+                        Delete
+                      </button>
                     </li>
                   ))}
                 </ul>
