@@ -31,7 +31,7 @@ export default function Home() {
     }
   };
 
-  // Handle task completion
+  // Handle toggling task completion
   const handleToggleComplete = async (id) => {
     const res = await fetch('/api/update', {
       method: 'PUT',
@@ -46,6 +46,11 @@ export default function Home() {
           task.id === updatedTask.id ? updatedTask : task
         )
       );
+
+      // Pindah ke tab History jika tugas selesai
+      if (updatedTask.completed && activeTab === 'active') {
+        setActiveTab('history');
+      }
     }
   };
 
