@@ -41,8 +41,8 @@ export default function Home() {
     if (res.ok) {
       const updatedTask = await res.json();
       setTasks(
-        tasks.map((task) =>
-          task.id === updatedTask.id ? updatedTask : task
+        prevTasks.map((task) =>
+            task.id === updatedTask.id ? { ...task, completed: true } : task
         )
       );
     }
