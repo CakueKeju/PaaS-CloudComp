@@ -5,7 +5,7 @@ export default function handler(req, res) {
     const { id } = req.body;
 
     tasks = tasks.map((task) =>
-      task.id === id ? { ...task, completed: !task.completed } : task
+      task.id === id ? { ...task, completed: true } : task
     );
 
     const updatedTask = tasks.find((task) => task.id === id);

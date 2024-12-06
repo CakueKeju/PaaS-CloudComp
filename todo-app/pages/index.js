@@ -31,9 +31,9 @@ export default function Home() {
     }
   };
 
-  // Handle toggling task completion
-  const handleToggleComplete = async (id) => {
-    const res = await fetch('/api/update', {
+  // Handle marking task as completed
+  const handleMarkAsCompleted = async (id) => {
+    const res = await fetch('/api/complete', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
@@ -47,8 +47,8 @@ export default function Home() {
         )
       );
 
-      // Pindah ke tab History jika tugas selesai
-      if (updatedTask.completed && activeTab === 'active') {
+      // Pindahkan ke tab History
+      if (activeTab === 'active') {
         setActiveTab('history');
       }
     }
@@ -65,18 +65,6 @@ export default function Home() {
     if (res.ok) {
       setTasks(tasks.filter((task) => task.id !== id));
     }
-  };
-
-  // Handle clearing all tasks
-  const handleDeleteAll = async () => {
-    for (const task of tasks) {
-      await fetch('/api/delete', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: task.id }),
-      });
-    }
-    setTasks([]);
   };
 
   // Filter tasks based on activeTab
@@ -142,35 +130,26 @@ export default function Home() {
                 <ul id="tasks" className="list-group mb-3">
                   {filteredTasks.map((task) => (
                     <li key={task.id} className="list-group-item d-flex justify-content-between align-items-center">
+                      <span>{task.task}</span>
                       <div>
-                        <input
-                          type="checkbox"
-                          checked={task.completed}
-                          onChange={() => handleToggleComplete(task.id)}
-                          className="form-check-input me-2"
-                        />
-                        <span className={task.completed ? 'text-decoration-line-through' : ''}>
-                          {task.task}
-                        </span>
+                        {activeTab === 'active' && (
+                          <button
+                            className="btn btn-sm btn-success me-2"
+                            onClick={() => handleMarkAsCompleted(task.id)}
+                          >
+                            Selesai
+                          </button>
+                        )}
+                        <button
+                          className="btn btn-sm btn-danger"
+                          onClick={() => handleDeleteTask(task.id)}
+                        >
+                          Delete
+                        </button>
                       </div>
-                      <button
-                        className="btn btn-sm btn-danger"
-                        onClick={() => handleDeleteTask(task.id)}
-                      >
-                        Delete
-                      </button>
                     </li>
                   ))}
                 </ul>
-
-                {activeTab === 'active' && (
-                  <button 
-                    onClick={handleDeleteAll} 
-                    className="btn btn-danger w-100"
-                  >
-                    Clear All
-                  </button>
-                )}
               </div>
             </div>
           </div>
