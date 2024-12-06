@@ -4,7 +4,6 @@ import Head from 'next/head';
 export default function Home() {
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState('');
-  const [activeTab, setActiveTab] = useState('active'); // active | history
 
   // Fetch tasks on component mount
   useEffect(() => {
@@ -46,11 +45,6 @@ export default function Home() {
           task.id === updatedTask.id ? updatedTask : task
         )
       );
-
-      // Pindahkan ke tab History
-      if (activeTab === 'active') {
-        setActiveTab('history');
-      }
     }
   };
 
@@ -67,11 +61,21 @@ export default function Home() {
     }
   };
 
-  // Filter tasks based on activeTab
-  const filteredTasks =
-    activeTab === 'active'
-      ? tasks.filter((task) => !task.completed)
-      : tasks.filter((task) => task.completed);
+  // Handle clearing all tasks
+  const handleDeleteAll = async () => {
+    for (const task of tasks.filter((task) => !task.completed)) {
+      await fetch('/api/delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: task.id }),
+      });
+    }
+    setTasks(tasks.filter((task) => task.completed)); // Hanya menyisakan tugas di history
+  };
+
+  // Filter tasks
+  const activeTasks = tasks.filter((task) => !task.completed);
+  const historyTasks = tasks.filter((task) => task.completed);
 
   return (
     <div className="bg-light min-vh-100 d-flex align-items-center">
@@ -84,11 +88,12 @@ export default function Home() {
       </Head>
 
       <div className="container py-5">
-        <div className="row justify-content-center">
+        <div className="row">
+          {/* Kotak Active Tasks */}
           <div className="col-md-6">
             <div className="card shadow">
               <div className="card-header text-center bg-primary text-white">
-                <h1 className="h4">To-Do List</h1>
+                <h1 className="h4">Active Tasks</h1>
               </div>
               <div className="card-body">
                 <form onSubmit={handleAddTask} className="mb-3">
@@ -107,39 +112,17 @@ export default function Home() {
                   </div>
                 </form>
 
-                {/* Tabs for switching between Active and History */}
-                <ul className="nav nav-tabs mb-3">
-                  <li className="nav-item">
-                    <button
-                      className={`nav-link ${activeTab === 'active' ? 'active' : ''}`}
-                      onClick={() => setActiveTab('active')}
-                    >
-                      Active Tasks
-                    </button>
-                  </li>
-                  <li className="nav-item">
-                    <button
-                      className={`nav-link ${activeTab === 'history' ? 'active' : ''}`}
-                      onClick={() => setActiveTab('history')}
-                    >
-                      History
-                    </button>
-                  </li>
-                </ul>
-
                 <ul id="tasks" className="list-group mb-3">
-                  {filteredTasks.map((task) => (
+                  {activeTasks.map((task) => (
                     <li key={task.id} className="list-group-item d-flex justify-content-between align-items-center">
                       <span>{task.task}</span>
                       <div>
-                        {activeTab === 'active' && (
-                          <button
-                            className="btn btn-sm btn-success me-2"
-                            onClick={() => handleMarkAsCompleted(task.id)}
-                          >
-                            Selesai
-                          </button>
-                        )}
+                        <button
+                          className="btn btn-sm btn-success me-2"
+                          onClick={() => handleMarkAsCompleted(task.id)}
+                        >
+                          Selesai
+                        </button>
                         <button
                           className="btn btn-sm btn-danger"
                           onClick={() => handleDeleteTask(task.id)}
@@ -147,6 +130,37 @@ export default function Home() {
                           Delete
                         </button>
                       </div>
+                    </li>
+                  ))}
+                </ul>
+
+                <button 
+                  onClick={handleDeleteAll} 
+                  className="btn btn-danger w-100"
+                >
+                  Clear All
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Kotak History Tasks */}
+          <div className="col-md-6">
+            <div className="card shadow">
+              <div className="card-header text-center bg-secondary text-white">
+                <h1 className="h4">History Tasks</h1>
+              </div>
+              <div className="card-body">
+                <ul id="history-tasks" className="list-group">
+                  {historyTasks.map((task) => (
+                    <li key={task.id} className="list-group-item d-flex justify-content-between align-items-center">
+                      <span>{task.task}</span>
+                      <button
+                        className="btn btn-sm btn-danger"
+                        onClick={() => handleDeleteTask(task.id)}
+                      >
+                        Delete
+                      </button>
                     </li>
                   ))}
                 </ul>
