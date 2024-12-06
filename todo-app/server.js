@@ -26,6 +26,8 @@ app.get("/tasks", (req, res) => {
     res.json(tasks);
 });
 
-app.listen(3000, () => {
-    console.log("Server running on port 3000");
+// Port yang diatur dari Environment Variables
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
