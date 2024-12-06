@@ -1,19 +1,19 @@
-let tasks = [];
+let tasks = []; // Array untuk menyimpan semua task
 
 export default function handler(req, res) {
   if (req.method === 'PUT') {
     const { id } = req.body;
 
-    // Temukan task yang ingin diperbarui
+    // Cari task berdasarkan ID
     const taskIndex = tasks.findIndex((task) => task.id === id);
     if (taskIndex === -1) {
       return res.status(404).json({ error: 'Task not found' });
     }
 
-    // Tandai task sebagai completed
+    // Tandai task sebagai selesai
     tasks[taskIndex].completed = true;
 
-    // Kirimkan task yang diperbarui sebagai response
+    // Kirim task yang diperbarui ke client
     res.status(200).json(tasks[taskIndex]);
   } else {
     res.setHeader('Allow', ['PUT']);
