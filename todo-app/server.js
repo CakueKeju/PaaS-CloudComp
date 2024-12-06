@@ -26,7 +26,7 @@ app.get("/tasks", (req, res) => {
     res.json(tasks);
 });
 
-// Port yang diatur dari Environment Variables
+// PORT akan diambil dari variabel lingkungan Vercel
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
